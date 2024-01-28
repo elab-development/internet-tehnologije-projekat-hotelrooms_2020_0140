@@ -29,6 +29,7 @@ Route::get('/users/{id}', [UserController::class, 'show']);
 Route::get('/hotels', [HotelController::class, 'index']);
 Route::get('/hotels/{id}', [HotelController::class, 'show']);
 
+
 Route::post('/register', [AuthorizationController::class, 'register']);
 Route::post('/login', [AuthorizationController::class, 'login']);
 
@@ -36,6 +37,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/profile', function (Request $request) {
         return auth()->user();
     });
+
+    Route::resource('/hotels', HotelController::class)
+        ->only(['store', 'update', 'destroy']);
 
     Route::post('/logout', [AuthorizationController::class, 'logout']);
 });

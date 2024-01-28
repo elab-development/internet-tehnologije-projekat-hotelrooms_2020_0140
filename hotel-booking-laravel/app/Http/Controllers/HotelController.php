@@ -29,6 +29,10 @@ class HotelController extends Controller
         ]);
     }
 
+    public function exportCSV()
+    {
+        return CSV::download(new HotelExport, 'hotels-export.csv');
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -58,6 +62,13 @@ class HotelController extends Controller
      */
     public function show($hotel_id)
     {
+        $hotel = Hotel::find($hotel_id);
+        if (is_null($hotel)) {
+            return response()->json('Hotel not found', 404);
+        }
+        return response()->json([
+            'hotel' => new HotelResource($hotel)
+        ]);
     }
 
     /**
@@ -80,6 +91,31 @@ class HotelController extends Controller
      */
     public function update(Request $request, Hotel $hotel)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'type' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'rating' => 'required|decimal:1|between:0,5',
+            'description' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $hotel->name = $request->name;
+        $hotel->type = $request->type;
+        $hotel->city = $request->city;
+        $hotel->address = $request->address;
+        $hotel->rating = $request->rating;
+        $hotel->description = $request->description;
+
+        $hotel->save();
+
+        return response()->json([
+            'Hotel updated' => new HotelResource($hotel)
+        ]);
     }
 
     /**
@@ -90,5 +126,7 @@ class HotelController extends Controller
      */
     public function destroy(Hotel $hotel)
     {
+        $hotel->delete();
+        return response()->json('Hotel deleted');
     }
 }
