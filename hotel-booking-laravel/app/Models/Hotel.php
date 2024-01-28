@@ -19,6 +19,11 @@ class Hotel extends Model
         'description'
     ];
 
+    public function rooms()
+    {
+        return $this->hasMany(Room::class);
+    }
+
     public static function getAllHotels()
     {
         $result = DB::table('hotels')
