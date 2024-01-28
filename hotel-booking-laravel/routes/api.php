@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthorizationController;
+use App\Http\Controllers\HotelController;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\RoomController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +26,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/users/{id}', [UserController::class, 'show']);
 
+Route::get('/hotels', [HotelController::class, 'index']);
+Route::get('/hotels/{id}', [HotelController::class, 'show']);
 
 Route::post('/register', [AuthorizationController::class, 'register']);
 Route::post('/login', [AuthorizationController::class, 'login']);
