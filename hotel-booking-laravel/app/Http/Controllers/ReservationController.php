@@ -89,6 +89,11 @@ class ReservationController extends Controller
      */
     public function show($reservation_id)
     {
+        $reservation = Reservation::find($reservation_id);
+        if (is_null($reservation)) {
+            return response()->json('Reservation not found', 404);
+        }
+        return response()->json(new ReservationResource($reservation));
     }
 
     /**
@@ -111,6 +116,41 @@ class ReservationController extends Controller
      */
     public function update(Request $request, Reservation $reservation)
     {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            'room_id' => 'required|integer',
+            'checkin' => 'required|date',
+            'checkout' => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $user = User::find($request->user_id);
+        if (is_null($user)) {
+            return response()->json('Guest not found!', 404);
+        }
+
+        $room = Room::find($request->room_id);
+        if (is_null($room)) {
+            return response()->json('Room not found!', 404);
+        }
+
+        if (strtotime(date('Y-m-d', strtotime($request->checkin))) > strtotime(date('Y-m-d', strtotime($request->checkout)))) {
+            return response()->json('Check-in date must be before check-out date!', 403);
+        }
+
+        $reservation->user_id = $request->user_id;
+        $reservation->room_id = $request->room_id;
+        $reservation->checkin = $request->checkin;
+        $reservation->checkout = $request->checkout;
+
+        $reservation->save();
+
+        return response()->json([
+            'Reservation updated' => new ReservationResource($reservation)
+        ]);
     }
 
     /**
@@ -121,5 +161,7 @@ class ReservationController extends Controller
      */
     public function destroy(Reservation $reservation)
     {
+        $reservation->delete();
+        return response()->json('Reservation removed');
     }
 }
